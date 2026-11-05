@@ -1,0 +1,15 @@
+# Vivado simulator / tool outputs
+sim/
+xsim.dir/
+.Xil/
+*.log
+*.jou
+*.pb
+*.wdb
+*.str
+webtalk*
+
+# Compiled C++
+*.exe
+*.o
+model/test_ref_book
