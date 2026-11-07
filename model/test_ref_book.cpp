@@ -10,7 +10,10 @@ using namespace ob;
 static int g_fail = 0;
 #define CHECK(cond) do { if (!(cond)) { std::printf("  FAIL line %d: %s\n", __LINE__, #cond); ++g_fail; } } while (0)
 
-static bool trade_is(const Trade& t, int b, int s, int p, int q) {
+// Checks trade number idx from the last submit. Safe if fewer trades exist.
+static bool trade_is(const OrderBook& ob, size_t idx, int b, int s, int p, int q) {
+    if (idx >= ob.trades().size()) return false;
+    const Trade& t = ob.trades()[idx];
     return t.buy_id == b && t.sell_id == s && t.price == p && t.qty == q;
 }
 
@@ -28,7 +31,7 @@ static void test_full_fill() {
     OrderBook ob; ob.reset();
     ob.submit(1, BUY, 10, 5);
     CHECK(ob.submit(2, SELL, 10, 5) == 1);
-    CHECK(trade_is(ob.trades()[0], 1, 2, 10, 5));
+    CHECK(trade_is(ob, 0, 1, 2, 10, 5));
     CHECK(ob.status() == ACK_FILLED);
     CHECK(ob.best_bid() == -1 && ob.best_ask() == -1);
 }
@@ -39,7 +42,7 @@ static void test_partial_fill_uses_resting_price() {
     OrderBook ob; ob.reset();
     ob.submit(1, BUY, 10, 5);
     CHECK(ob.submit(2, SELL, 9, 8) == 1);
-    CHECK(trade_is(ob.trades()[0], 1, 2, 10, 5));
+    CHECK(trade_is(ob, 0, 1, 2, 10, 5));
     CHECK(ob.status() == ACK_RESTED);        // 3 left over, rests at ask 9
     CHECK(ob.best_ask() == 9);
     CHECK(ob.best_bid() == -1);
@@ -52,8 +55,8 @@ static void test_time_priority() {
     ob.submit(1, BUY, 10, 3);
     ob.submit(2, BUY, 10, 3);
     CHECK(ob.submit(3, SELL, 10, 4) == 2);
-    CHECK(trade_is(ob.trades()[0], 1, 3, 10, 3));
-    CHECK(trade_is(ob.trades()[1], 2, 3, 10, 1));
+    CHECK(trade_is(ob, 0, 1, 3, 10, 3));
+    CHECK(trade_is(ob, 1, 2, 3, 10, 1));
     CHECK(ob.status() == ACK_FILLED);
     CHECK(ob.level_count(BUY, 10) == 1);     // order 2 still has 2 left
 }
@@ -66,8 +69,8 @@ static void test_sweep_levels() {
     ob.submit(2, SELL, 6, 2);
     ob.submit(3, SELL, 7, 2);
     CHECK(ob.submit(4, BUY, 6, 10) == 2);    // takes 5 and 6, not 7
-    CHECK(trade_is(ob.trades()[0], 4, 1, 5, 2));
-    CHECK(trade_is(ob.trades()[1], 4, 2, 6, 2));
+    CHECK(trade_is(ob, 0, 4, 1, 5, 2));
+    CHECK(trade_is(ob, 1, 4, 2, 6, 2));
     CHECK(ob.status() == ACK_RESTED);        // 6 left, rests at bid 6
     CHECK(ob.best_bid() == 6);
     CHECK(ob.best_ask() == 7);
