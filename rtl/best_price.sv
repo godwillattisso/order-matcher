@@ -13,17 +13,18 @@ module best_price #(
 
   always_comb begin : blockName
     
+    best_bid = 0;
+    best_ask = 0;
+    
     for (int p = 0; p < NUM_LEVELS; p++) begin
       
-      best_bid = 0;
-      best_ask = 0;
       if (bid_occ[p]) begin
         
         best_bid = 4'(p);
       end
     end
 
-    for (p = NUM_LEVELS - 1; p >= 0; p-- ) begin
+    for (int p = NUM_LEVELS - 1; p >= 0; p-- ) begin
       
       if (ask_occ[p]) begin
         
@@ -33,7 +34,7 @@ module best_price #(
   end
 
 
-  // valid = "any bit set". One assign each. Hint: the reduction OR operator |.
+  // Makes sure there is at least one bit that's = 1
   assign bid_valid = |bid_occ;  // 
   assign ask_valid = |ask_occ;  //
 

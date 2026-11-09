@@ -6,6 +6,7 @@
 //                                                    │
 //   same ops ──> model arrays in this file ──────────┴─> compare ──> PASS / FAIL
 module tb_book;
+  timeunit 1ns; timeprecision 1ps;   // #5 = 5 ns
   localparam int BUY = 0, SELL = 1;
 
   // ---------------- clock and reset ----------------
@@ -45,7 +46,7 @@ module tb_book;
     checks++;
     if (!ok) begin
       errors++;
-      $display("FAIL #%0d at %0t ns: %s", errors, $time, what);
+      $display("FAIL #%0d at %0t: %s", errors, $time, what);
     end
   endtask
 
@@ -128,6 +129,7 @@ module tb_book;
 
   // ---------------- the tests ----------------
   initial begin
+    $timeformat(-9, 0, " ns", 0);   // print times as e.g. "145 ns"
     for (int s = 0; s < 2; s++) begin
       sel[s] = 0; push[s] = 0; pop[s] = 0; dec[s] = 0;
       pid[s] = 0; pqty[s] = 0; dqty[s] = 0;
