@@ -70,7 +70,7 @@ namespace ob
         if (side != BUY && side != SELL)
             return -1; // Makes sure only buying or selling are the only options
         if (price < 0 || price >= NUM_LEVELS)
-            return -1; // Makes sure that the price fits in the max array numbers
+            return -1; // Makes sure that the price fits in the max array numbersS
         if (qty <= 0 || qty > 255)
             return -1; // Makes sure that the quantty of shares can fit in a 8 bit max which is 255
 

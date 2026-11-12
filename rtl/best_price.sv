@@ -11,11 +11,11 @@ module best_price #(
   output logic [3:0]            best_ask    // LOWEST  price with asks
 );
 
-  always_comb begin : blockName
+  always_comb begin : BestPrice
     
     best_bid = 0;
     best_ask = 0;
-    
+
     for (int p = 0; p < NUM_LEVELS; p++) begin
       
       if (bid_occ[p]) begin
@@ -35,7 +35,7 @@ module best_price #(
 
 
   // Makes sure there is at least one bit that's = 1
-  assign bid_valid = |bid_occ;  // 
-  assign ask_valid = |ask_occ;  //
+  assign bid_valid = |bid_occ;  
+  assign ask_valid = |ask_occ;  
 
 endmodule
