@@ -1,0 +1,49 @@
+[compile] xvlog ...
+[compile] xelab ...
+[run] random_mix_test seed 1 ... PASS
+[run] random_mix_test seed 2 ... PASS
+[run] random_mix_test seed 3 ... PASS
+[run] calm_market_test seed 1 ... PASS
+[run] calm_market_test seed 2 ... PASS
+[run] calm_market_test seed 3 ... PASS
+[run] frantic_market_test seed 1 ... PASS
+[run] frantic_market_test seed 2 ... PASS
+[run] frantic_market_test seed 3 ... PASS
+[run] whale_test seed 1 ... PASS
+[run] whale_test seed 2 ... PASS
+[run] whale_test seed 3 ... PASS
+[run] one_sided_test seed 1 ... PASS
+[run] one_sided_test seed 2 ... PASS
+[run] one_sided_test seed 3 ... PASS
+[run] fill_level_test seed 1 ... PASS
+[run] fill_level_test seed 2 ... PASS
+[run] fill_level_test seed 3 ... PASS
+[run] all_scenarios_test seed 1 ... PASS
+[run] all_scenarios_test seed 2 ... PASS
+[run] all_scenarios_test seed 3 ... PASS
+
+TEST                   SEED  RESULT  ORDERS  TRADES  ERRORS   COV %  TIME s
+---------------------------------------------------------------------------
+random_mix_test           1    PASS    1000     691       0    88.1    12.6
+random_mix_test           2    PASS    1000     701       0    88.1    13.6
+random_mix_test           3    PASS    1000     682       0    84.5    11.9
+calm_market_test          1    PASS    1000     696       0    83.3     3.2
+calm_market_test          2    PASS    1000     693       0    83.3     3.2
+calm_market_test          3    PASS    1000     706       0    79.8     3.2
+frantic_market_test       1    PASS    1000     701       0    89.3     3.2
+frantic_market_test       2    PASS    1000     762       0    89.3     3.3
+frantic_market_test       3    PASS    1000     715       0    89.3     3.6
+whale_test                1    PASS    1000     748       0    88.1     3.2
+whale_test                2    PASS    1000     761       0    84.5     3.2
+whale_test                3    PASS    1000     800       0    88.1     3.2
+one_sided_test            1    PASS    1000      40       0    84.5     3.2
+one_sided_test            2    PASS    1000      35       0    84.5     3.2
+one_sided_test            3    PASS    1000      46       0    84.5     3.2
+fill_level_test           1    PASS     500     360       0    88.1     2.9
+fill_level_test           2    PASS     500     338       0    88.1     2.9
+fill_level_test           3    PASS     500     324       0    84.5     2.9
+all_scenarios_test        1    PASS    1000     328       0   100.0     3.2
+all_scenarios_test        2    PASS    1000     356       0   100.0     3.2
+all_scenarios_test        3    PASS    1000     351       0   100.0     3.2
+---------------------------------------------------------------------------
+21/21 runs passed | 19500 orders, 10834 trades checked | best coverage 100.0%

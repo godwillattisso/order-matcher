@@ -8,7 +8,7 @@ class market_seq extends uvm_sequence #(order_item);
   int n_orders  = 200;
   int price_lo  = 4,  price_hi = 11;   // price range
   int qty_lo    = 1,  qty_hi   = 8;    // normal order size
-  int whale_pct = 10;                  // % big orders (qty 20..120)
+  int whale_pct = 10;                  // % big orders (qty 40..150)
   int buy_pct   = 50;                  // % BUY orders
   static int next_id = 0;              // ids keep counting across sequences
 
@@ -21,28 +21,24 @@ class market_seq extends uvm_sequence #(order_item);
     bit        whale, buy;
     int        cur_id;
     for (int i = 0; i < n_orders; i++) begin
-      it    = order_item::type_id::create($sformatf("mkt%0d", i));
-      whale = ($urandom_range(99, 0) < whale_pct);
-      buy   = ($urandom_range(99, 0) < buy_pct);
+      it     = order_item::type_id::create($sformatf("mkt%0d", i));
+      whale  = ($urandom_range(99, 0) < whale_pct);
+      buy    = ($urandom_range(99, 0) < buy_pct);
       cur_id = next_id % 256;
-      // Turn OFF order_item's soft defaults (price 4..11, qty 1..8). A soft constraint is only
-      // dropped when it CONFLICTS; "qty 1..19" doesn't conflict with "qty 1..8", so without
-      // this line the solver keeps both and qty 9..19 never happens. (Coverage caught this.)
-      it.c_default.constraint_mode(0);
       start_item(it);
-      if (!it.randomize() with {
-            id    == local::cur_id;
-            side  == !local::buy;
-            price inside {[local::price_lo : local::price_hi]};
-            if (local::whale) qty inside {[20:120]};   // big enough to sweep 4+ levels
-            else              qty inside {[local::qty_lo : local::qty_hi]};
-          })
+      if (!it.randomize() with { id == local::cur_id; side == !local::buy; })
         `uvm_fatal("RAND", "randomize failed")
+      // Price and size are picked HERE, not by the solver. In Vivado, order_item's soft
+      // defaults (qty 1..8, price 4..11) stayed active even with constraint_mode(0), so
+      // qty 9..19 never happened. Coverage caught it: the qty coverpoint was stuck at 67%.
+      it.price = $urandom_range(price_hi, price_lo);
+      it.qty   = whale ? $urandom_range(150, 40) : $urandom_range(qty_hi, qty_lo);
       next_id++;
       finish_item(it);
     end
   endtask
 endclass
+
 
 // fill_level_seq: fills price levels to their limit of 4, then keeps going, so orders get REJECTED.
 // Uses the extreme prices (BUY at 0-1, SELL at 14-15), where the other side almost never trades.

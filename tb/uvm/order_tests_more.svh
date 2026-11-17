@@ -78,11 +78,12 @@ class all_scenarios_test extends market_test_base;
   endfunction
   task run_stimulus();
     int n = n_orders / 5;
-    run_market(n, 4, 11, 1, 8, 0, 100);    // one-sided: BUYs into an empty ask side
-    run_market(n, 4, 11, 1, 8, 20, 0);     //            then SELLs sweep them
-    run_market(n, 0, 15, 1, 8, 0, 50);     // calm
-    run_market(n, 7, 8, 1, 19, 10, 50);    // frantic, medium sizes
-    run_fill_levels(20);                   // full levels, rejects
-    run_market(n, 4, 11, 1, 8, 50, 50);    // whales
+    run_market(n / 2, 8, 15, 1, 8, 0, 0);      // empty book: a "ladder" of small SELLs at 8..15
+    run_market(n / 2, 15, 15, 1, 8, 100, 100); // BUY whales at 15 sweep up the ladder (4+ levels)
+    run_market(n, 4, 11, 1, 8, 0, 100);        // one-sided: BUYs...
+    run_market(n, 4, 11, 1, 8, 20, 0);         //            ...then SELLs sweep them
+    run_market(n, 0, 15, 1, 8, 0, 50);         // calm
+    run_market(n, 7, 8, 1, 19, 10, 50);        // frantic, medium sizes
+    run_fill_levels(20);                       // full levels, rejects
   endtask
 endclass
