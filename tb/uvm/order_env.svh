@@ -27,6 +27,7 @@ class order_env extends uvm_env;
   `uvm_component_utils(order_env)
   order_agent      agent;
   order_scoreboard sb;
+  order_coverage   cov;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -36,9 +37,11 @@ class order_env extends uvm_env;
     super.build_phase(phase);
     agent = order_agent::type_id::create("agent", this);
     sb    = order_scoreboard::type_id::create("sb", this);
+    cov   = order_coverage::type_id::create("cov", this);
   endfunction
 
   function void connect_phase(uvm_phase phase);
     agent.mon.ap.connect(sb.imp);                     // every monitor result goes to the scoreboard
+    agent.mon.ap.connect(cov.analysis_export);        // ...and to the coverage collector
   endfunction
 endclass

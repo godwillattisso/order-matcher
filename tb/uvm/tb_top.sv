@@ -23,14 +23,18 @@ module tb_top;
     .bid_valid(vif.bid_valid),     .ask_valid(vif.ask_valid),
     .best_bid(vif.best_bid),       .best_ask(vif.best_ask));
 
+  // Attach the assertion modules (om_sva.sv) INSIDE the RTL, without editing the RTL.
+  // .* connects each assertion port to the signal with the same name inside that module.
+  bind book_side    book_sva   u_book_sva   (.*);
+  bind match_engine engine_sva u_engine_sva (.*);
+
   initial begin
     vif.rst = 1;
     repeat (3) @(posedge clk);
     @(negedge clk) vif.rst = 0;
   end
 
-  // Vivado's UVM is built without DPI, so it can't read +UVM_TESTNAME itself.
-  // Read it here and pass it to run_test(). Default: random_mix_test.
+  // Read +UVM_TESTNAME here too, so the log shows which test ran. Default: random_mix_test.
   string test_name = "random_mix_test";
   initial begin
     if ($value$plusargs("UVM_TESTNAME=%s", test_name))

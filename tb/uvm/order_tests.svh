@@ -39,17 +39,20 @@ class base_test extends uvm_test;
     phase.drop_objection(this);      // "I'm done": the run phase ends, checking starts
   endtask
 
-  // The sequence finishes when the LAST ORDER IS ACCEPTED, not when it's done matching.
-  // Wait until the scoreboard has a result for every order (or give up after a timeout).
+  // The sequences finish when the LAST ORDER IS ACCEPTED, not when it's done matching.
+  // Wait until the scoreboard has a result for every accepted order (or time out).
   task wait_all_done();
     int waited = 0;
-    while (env.sb.got.size() < n_orders && waited < 100000) begin
+    #100ns;                          // let the last accepted order start
+    while (env.sb.got.size() < n_accepted && waited < 100000) begin
       #10ns;
       waited++;
     end
-    if (env.sb.got.size() < n_orders)
-      `uvm_error("TIMEOUT", $sformatf("only %0d of %0d orders finished; the DUT accepted %0d. Accepted 0: check the sequence/driver. Accepted all, 0 finished: check the monitor.",
-                                      env.sb.got.size(), n_orders, n_accepted))
+    if (n_accepted == 0)
+      `uvm_error("TIMEOUT", "the DUT accepted 0 orders: check the sequence/driver")
+    else if (env.sb.got.size() < n_accepted)
+      `uvm_error("TIMEOUT", $sformatf("only %0d of %0d accepted orders finished: check the monitor, or the FSM is stuck",
+                                      env.sb.got.size(), n_accepted))
   endtask
 endclass
 
