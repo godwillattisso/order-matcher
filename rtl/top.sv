@@ -7,13 +7,19 @@
 //  match_engine ── best bid/ask ──► seg7_display ──► 7-segment digits
 //  counters ──► LEDs: led[7:0] = trades so far, led[15:8] = orders so far (both wrap at 256)
 //
-// Reset: the centre button (btnC), plus an automatic reset for the first 16 cycles after the
-// bitstream loads (power-on reset), so the board starts clean without pressing anything.
+// Clock: the board's 100 MHz oscillator goes into an MMCM (a clock generator inside the FPGA) that
+// makes a 50 MHz clock for the whole design. At 100 MHz the engine failed timing (WNS -2.262 ns):
+// its longest path (book count -> best price -> FSM -> book update enable, 12 logic levels, fanout
+// 120) needs ~12.3 ns, so the design can run at up to ~81 MHz. 50 MHz gives a large safety margin.
+// The simulation testbenches don't use the MMCM (see `ifdef SYNTHESIS below); they drive the clock directly.
+//
+// Reset: the centre button (btnC), plus an automatic reset for 16 cycles after the clock is stable
+// (power-on reset), so the board starts clean without pressing anything.
 
 module top #(
-  parameter int CLKS_PER_BIT = 868          // 100 MHz / 115200 baud
+  parameter int CLKS_PER_BIT = 434          // 50 MHz / 115200 baud
 ) (
-  input  logic        clk,                  // 100 MHz oscillator (pin W5)
+  input  logic        clk_100,              // 100 MHz oscillator (pin W5)
   input  logic        btnC,                 // centre button = reset
   input  logic        RsRx,                 // serial from the PC
   output logic        RsTx,                 // serial to the PC
@@ -23,13 +29,39 @@ module top #(
   output logic [15:0] led
 );
 
+  // ---------------- clock: 100 MHz in -> 50 MHz for the design ----------------
+  logic clk;              // the design clock (50 MHz on the board)
+  logic mmcm_locked;      // 1 once the MMCM's output clock is stable
+`ifdef SYNTHESIS
+  // MMCM: VCO = 100 MHz x 10 = 1000 MHz (legal range 600-1200), output = 1000 / 20 = 50 MHz.
+  logic clk_fb, clk_50_unbuf;
+  MMCME2_BASE #(
+    .CLKIN1_PERIOD   (10.0),
+    .CLKFBOUT_MULT_F (10.0),
+    .DIVCLK_DIVIDE   (1),
+    .CLKOUT0_DIVIDE_F(20.0)
+  ) u_mmcm (
+    .CLKIN1(clk_100), .CLKFBIN(clk_fb), .CLKFBOUT(clk_fb),
+    .CLKOUT0(clk_50_unbuf), .LOCKED(mmcm_locked),
+    .RST(1'b0), .PWRDWN(1'b0),
+    .CLKFBOUTB(), .CLKOUT0B(), .CLKOUT1(), .CLKOUT1B(), .CLKOUT2(), .CLKOUT2B(),
+    .CLKOUT3(), .CLKOUT3B(), .CLKOUT4(), .CLKOUT5(), .CLKOUT6()
+  );
+  BUFG u_bufg (.I(clk_50_unbuf), .O(clk));   // global clock buffer: reaches every flip-flop with low skew
+`else
+  // Simulation: no MMCM model needed, the testbench clock is the design clock.
+  assign clk         = clk_100;
+  assign mmcm_locked = 1'b1;
+`endif
+
   // ---------------- reset ----------------
   logic [1:0] btn_sync = '0;                 // the button is asynchronous: synchronize it
   logic [4:0] por_cnt  = '0;                 // counts 0..16 after configuration
   logic       rst;
   always_ff @(posedge clk) begin
     btn_sync <= {btn_sync[0], btnC};
-    if (!por_cnt[4]) por_cnt <= por_cnt + 1'b1;
+    if (!mmcm_locked)    por_cnt <= '0;              // hold reset until the clock is stable
+    else if (!por_cnt[4]) por_cnt <= por_cnt + 1'b1;
     rst <= !por_cnt[4] || btn_sync[1];
   end
 

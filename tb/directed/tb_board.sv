@@ -24,7 +24,7 @@ module tb_board;
   logic [3:0]  an;
   logic [15:0] led;
 
-  top #(.CLKS_PER_BIT(CPB)) dut (.clk, .btnC, .RsRx, .RsTx, .seg, .dp, .an, .led);
+  top #(.CLKS_PER_BIT(CPB)) dut (.clk_100(clk), .btnC, .RsRx, .RsTx, .seg, .dp, .an, .led);
 
   // ---- PC side of the serial line ----
   task automatic pc_send(input logic [7:0] b);

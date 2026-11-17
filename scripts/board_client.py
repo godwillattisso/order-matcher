@@ -61,44 +61,77 @@ def expected_cycles(status, n_trades):
     return 2 + 2 * n_trades if status == 1 else 4 + 2 * n_trades
 
 
-# ---------------- YOUR CODE ----------------
-def encode_order(oid, side, price, qty):
-    """Return the 5-byte packet for one order: 0xA5, id, side, price, qty.
 
-    ===== TODO 1 =====
-    First check every value is legal for the hardware (id 0-255, side 0 or 1, price 0-15,
-    qty 1-255) and raise ValueError(...) if not. Then return bytes([...]).
-    """
-    raise NotImplementedError("TODO 1: encode_order")
+def encode_order(oid, side, price, qty):
+    """Encode an order into a 5-byte UART packet."""
+
+    if not (0 <= oid <= 255):
+        raise ValueError("Order ID must be between 0 and 255")
+
+    if side not in (0, 1):
+        raise ValueError("Side must be 0 (BUY) or 1 (SELL)")
+
+    if not (0 <= price <= 15):
+        raise ValueError("Price must be between 0 and 15")
+
+    if not (1 <= qty <= 255):
+        raise ValueError("Quantity must be between 1 and 255")
+
+    return bytes([HEADER, oid, side, price, qty])
+
+
 
 
 def read_reply(port):
-    """Read the board's messages for ONE order, up to and including its 'D' message.
+    """Read all trades and the final done message for one order."""
 
-    Returns (trades, done_id, status, cycles), where trades is a list of
-    (buy_id, sell_id, price, qty) tuples in the order they arrived.
+    trades = []
 
-    ===== TODO 2 =====
-    Loop:
-      kind = read_exact(port, 1)[0]          # first byte of a message (an int)
-      'T' (MSG_TRADE): read 4 more bytes, append (buy_id, sell_id, price, qty) to trades
-      'D' (MSG_DONE) : read 3 more bytes (id, status, cycles) and return
-      anything else  : raise ValueError (we lost our place in the byte stream)
-    Tip: a bytes object unpacks like a tuple:  a, b, c = read_exact(port, 3)
-    """
-    raise NotImplementedError("TODO 2: read_reply")
+    while True:
+        kind = read_exact(port, 1)[0]
+
+        if kind == MSG_TRADE:
+            buy_id, sell_id, price, qty = read_exact(port, 4)
+
+            trades.append((buy_id, sell_id, price, qty))
+
+        elif kind == MSG_DONE:
+            done_id, status, cycles = read_exact(port, 3)
+
+            return trades, done_id, status, cycles
+
+        else:
+            raise ValueError(
+                f"Unknown message type: 0x{kind:02X}"
+            )
 
 
 def compare_files(hw_path, ref_path):
-    """Compare the board's results with the C++ model's, line by line.
+    """Compare hardware results against the C++ reference model."""
 
-    ===== TODO 3 =====
-    Read both files (Path(...).read_text().splitlines()), strip each line, skip empty lines.
-    Walk both lists together; if one is shorter, use "<missing>" for its side.
-    Return a list of (line_number, board_line, model_line) for every line that differs
-    (line_number counts from 1). An empty list means a perfect match.
-    """
-    raise NotImplementedError("TODO 3: compare_files")
+    hw_lines = [
+        line.strip()
+        for line in Path(hw_path).read_text().splitlines()
+        if line.strip()
+    ]
+
+    ref_lines = [
+        line.strip()
+        for line in Path(ref_path).read_text().splitlines()
+        if line.strip()
+    ]
+
+    diffs = []
+
+    for i in range(max(len(hw_lines), len(ref_lines))):
+
+        hw_line = hw_lines[i] if i < len(hw_lines) else "<missing>"
+        ref_line = ref_lines[i] if i < len(ref_lines) else "<missing>"
+
+        if hw_line != ref_line:
+            diffs.append((i + 1, hw_line, ref_line))
+
+    return diffs
 
 
 # ---------------- modes (given) ----------------

@@ -1,9 +1,10 @@
 ## basys3.xdc : which FPGA pin each top.sv port connects to, and the clock speed.  (GIVEN)
 ## Pin names come from the Digilent Basys3 master constraints file.
 
-## 100 MHz clock (10 ns period). Timing analysis checks every path against this.
-set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports clk]
-create_clock -name sys_clk -period 10.000 [get_ports clk]
+## 100 MHz oscillator (10 ns period) into the MMCM in top.sv. Vivado works out the MMCM's 50 MHz
+## output clock by itself and checks every path in the design against 20 ns.
+set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports clk_100]
+create_clock -name sys_clk -period 10.000 [get_ports clk_100]
 
 ## Centre button = reset
 set_property -dict { PACKAGE_PIN U18  IOSTANDARD LVCMOS33 } [get_ports btnC]
