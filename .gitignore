@@ -14,3 +14,5 @@ webtalk*
 *.o
 model/test_ref_book
 build/
+order_matcher_basys3/
+vivado_proj/

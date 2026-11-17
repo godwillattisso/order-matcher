@@ -1,6 +1,4 @@
 // uart_rx.sv : receives one byte from the serial line, UART "8N1" format.
-//
-//   line idle = 1 | start bit = 0 | 8 data bits, LSB first | stop bit = 1
 
 module uart_rx #(
   parameter int CLKS_PER_BIT = 868

@@ -1,10 +1,5 @@
 // seg7_display.sv : shows best bid (left 2 digits) and best ask (right 2 digits).  (GIVEN)
-//
-//   [ b b . a a ]     e.g.  " 9 10"  = best bid 9, best ask 10.   "--" = that side is empty.
-//
-// The Basys3 has ONE set of segment wires shared by 4 digits. To show 4 different digits we light
-// one digit at a time, switching every ~0.66 ms. Your eye can't see the switching ("multiplexing").
-// Segments and digit enables are active-LOW on the Basys3: 0 = on.
+
 
 module seg7_display (
   input  logic       clk,

@@ -1,14 +1,5 @@
 // tb_uart.sv : unit test for YOUR uart_tx and uart_rx.  (GIVEN)
-//
-//   uart_tx ──tx wire──► uart_rx        (a "loopback": what tx sends, rx must receive)
-//
-//   U1  idle line is 1 and ready is 1 after reset
-//   U2  one byte (0x35): the bits on the wire are exactly start, 8 data LSB-first, stop
-//   U3  all 256 byte values, back to back, received correctly and in order
-//   U4  a short 0 glitch on the line (shorter than half a bit) is ignored by uart_rx
-//   U5  ready is 0 while a byte is being sent
-//
-// CLKS_PER_BIT is 16 here (not 868) so the test runs in a moment. Same logic, fewer cycles.
+
 
 `timescale 1ns/1ps
 module tb_uart;
