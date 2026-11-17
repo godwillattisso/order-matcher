@@ -1,9 +1,6 @@
 // tb_engine.sv : Day 3 test for match_engine (directed + random)
 // GIVEN FILE: you don't need to edit it. Read it to see how your FSM is used.
-//
-//   send_order ──valid/ready──► [ match_engine ] ──trades (valid/ready)──► collector
-//        │                                       ──done pulse + status──►     │
-//        └──► model_submit (same 5 rules, in this file) ──► expected ──► compare ──► PASS / FAIL
+
 module tb_engine;
   timeunit 1ns; timeprecision 1ps;   // #5 = 5 ns
 

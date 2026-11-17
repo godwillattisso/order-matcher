@@ -1,10 +1,6 @@
 // tb_book.sv : Day 2 directed + random test for book_side and best_price
 // GIVEN FILE: you don't need to edit it. Read it to see how your RTL is used.
-//
-//   tasks drive ports ──> [ bids: book_side ] ──occ──┐
-//                         [ asks: book_side ] ──occ──┼─> [ best_price ] ──> best bid / ask
-//                                                    │
-//   same ops ──> model arrays in this file ──────────┴─> compare ──> PASS / FAIL
+
 module tb_book;
   timeunit 1ns; timeprecision 1ps;   // #5 = 5 ns
   localparam int BUY = 0, SELL = 1;

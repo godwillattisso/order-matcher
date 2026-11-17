@@ -1,20 +1,6 @@
 // ref_runner.cpp - runs the C++ reference model on a file of orders and writes the
 // expected results to another file. Used instead of DPI (file-based checking).
-//
-// Usage:   ref_runner.exe <orders_in.txt> <expected_out.txt>
-//
-// Input  (one order per line):        <id> <side> <price> <qty>
-//                                      side: 0 = BUY, 1 = SELL
-// Output (for each order, in order):  S <order_index> <num_trades> <status>
-//                                      then one line per trade:
-//                                      T <order_index> <buy_id> <sell_id> <price> <qty>
-//                                      status: 0 = ACK_RESTED, 1 = ACK_FILLED, 2 = REJECT_FULL
-//                                      num_trades = -1 means the order was illegal
-//
-// Build (MSYS2 UCRT64 terminal, from the model folder):
-//   g++ -std=c++14 -Wall -static -o ref_runner ref_runner.cpp ref_book.cpp
-// -static makes ref_runner.exe self-contained, so it runs from a normal Command
-// Prompt (and from the simulator) without MSYS2 on the Windows PATH.
+
 #include "ref_book.h"
 #include <cstdio>
 

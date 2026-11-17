@@ -1,17 +1,4 @@
 // match_engine.sv : the matching engine = 2 books + best-price finder + match FSM
-//
-//   IDLE  : in_ready = 1. On in_valid, latch the order (id, side, price, qty).
-//   CHECK : look at the best price on the OPPOSITE side. Acceptable? → FILL. Otherwise → REST.
-//   FILL  : show one trade (trade_valid = 1). When trade_ready: pop or dec the resting order,
-//           lower the remaining qty. Nothing left → DONE (FILLED). Some left → CHECK again.
-//   REST  : own side, own price. Level full → REJECT_FULL. Otherwise push {id, remaining} → RESTED.
-//   DONE  : done_valid = 1 for one cycle with the status. → IDLE.
-//
-// Why CHECK and FILL are separate states: a pop or dec in FILL changes the book on the clock edge.
-// The best price is only correct again in the NEXT cycle, so CHECK re-reads it before the next fill.
-// Cost: 2 cycles per fill. (Day 6 performance question: can you make it 1?)
-//
-// YOU WRITE: TODO 1 - 5. Don't change the port list (the testbench uses it).
 
 module match_engine (
   input  logic       clk,
@@ -169,10 +156,7 @@ output logic [3:0] best_ask       // Lowest available SELL price (0–15)
   end
 
 
-  // ================= TODO 4: order registers (always_ff, no reset needed. Why?) =================
-  //   IDLE && in_valid : latch id_r, side_r, price_r, rem_r from the in_* inputs
-  //   do_fill          : rem_r <= rem_r - fill_qty; and if last_fill, status_r <= ACK_FILLED
-  //   REST             : status_r <= own_full ? REJECT_FULL : ACK_RESTED
+  // order registers 
   // Store incoming order + update quantity + record status.
 
   always_ff @( posedge clk ) begin : Order_Register
