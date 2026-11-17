@@ -13,3 +13,4 @@ webtalk*
 *.exe
 *.o
 model/test_ref_book
+build/
