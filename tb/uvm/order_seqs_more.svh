@@ -18,23 +18,22 @@ class market_seq extends uvm_sequence #(order_item);
 
   task body();
     order_item it;
-    bit        whale, buy;
-    int        cur_id;
-    for (int i = 0; i < n_orders; i++) begin
-      it     = order_item::type_id::create($sformatf("mkt%0d", i));
-      whale  = ($urandom_range(99, 0) < whale_pct);
-      buy    = ($urandom_range(99, 0) < buy_pct);
-      cur_id = next_id % 256;
-      start_item(it);
-      if (!it.randomize() with { id == local::cur_id; side == !local::buy; })
-        `uvm_fatal("RAND", "randomize failed")
-      // Price and size are picked HERE, not by the solver. In Vivado, order_item's soft
-      // defaults (qty 1..8, price 4..11) stayed active even with constraint_mode(0), so
-      // qty 9..19 never happened. Coverage caught it: the qty coverpoint was stuck at 67%.
-      it.price = $urandom_range(price_hi, price_lo);
-      it.qty   = whale ? $urandom_range(150, 40) : $urandom_range(qty_hi, qty_lo);
-      next_id++;
-      finish_item(it);
+    bit        s;
+    int        p;
+    for (int r = 0; r < n_rounds; r++) begin
+      s = $urandom_range(1, 0);                              // 0 BUY, 1 SELL
+      p = s ? $urandom_range(15, 14) : $urandom_range(1, 0); // far from the other side
+      for (int k = 0; k < 5; k++) begin
+        it = order_item::type_id::create($sformatf("fill%0d_%0d", r, k));
+        it.c_default.constraint_mode(0);
+        start_item(it);
+        if (!it.randomize() with { id    == (local::r * 5 + local::k) % 256;
+                                   side  == local::s;
+                                   price == local::p;
+                                   qty inside {[1:3]}; })
+          `uvm_fatal("RAND", "fill_level randomize failed")
+        finish_item(it);
+      end
     end
   endtask
 endclass

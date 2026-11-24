@@ -1,4 +1,4 @@
-// top.sv : the whole design on the Basys3 board.  (GIVEN)
+// top.sv : the whole design on the Basys3 board.
 //
 //  PC (USB serial) ──RsRx──► uart_rx ──bytes──► order_rx ──order──► match_engine
 //                                                                    │ trades  │ done
@@ -17,7 +17,8 @@
 // (power-on reset), so the board starts clean without pressing anything.
 
 module top #(
-  parameter int CLKS_PER_BIT = 434          // 50 MHz / 115200 baud
+  parameter int CLKS_PER_BIT = 434,         // 50 MHz / 115200 baud
+  parameter int TRADE_FLASH  = 25_000_000   // decimal points light for 0.5 s after each trade (50 MHz)
 ) (
   input  logic        clk_100,              // 100 MHz oscillator (pin W5)
   input  logic        btnC,                 // centre button = reset
@@ -130,7 +131,16 @@ module top #(
 
   // ---------------- display + LEDs ----------------
   seg7_display u_seg (.clk, .bid_valid, .best_bid, .ask_valid, .best_ask, .seg, .an);
-  assign dp = 1'b1;                          // decimal points off
+
+  // Trade indicator: every trade lights the decimal points for TRADE_FLASH cycles.
+  // dp is shared by all 4 digits (like seg), so all 4 dots light. Active-low: 0 = on.
+  logic [$clog2(TRADE_FLASH+1)-1:0] flash_cnt;
+  always_ff @(posedge clk) begin
+    if (rst)                             flash_cnt <= '0;
+    else if (trade_valid && trade_ready) flash_cnt <= TRADE_FLASH;
+    else if (flash_cnt != 0)             flash_cnt <= flash_cnt - 1'b1;
+  end
+  assign dp = (flash_cnt == 0);
 
   logic [7:0] n_trades, n_orders;
   always_ff @(posedge clk) begin

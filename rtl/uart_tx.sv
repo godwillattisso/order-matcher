@@ -22,10 +22,7 @@ module uart_tx #(
   assign ready    = (state == IDLE);
   assign bit_done = (clk_cnt == CLKS_PER_BIT - 1);
 
-  // ===== YOU WRITE: TODO 1 - 4 (one always_ff, a case on state) =====
-  // One process is fine here: every output (tx, counters, state) is a register.
-  // Pattern for every bit state: hold tx at the bit's value; count clk_cnt up; when bit_done,
-  // clear clk_cnt and move on. bit_done is already defined above.
+
   always_ff @(posedge clk) begin
     if (rst) begin
       state   <= IDLE;
